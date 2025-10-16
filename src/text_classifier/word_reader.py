@@ -43,7 +43,7 @@ class WordReader:
         return [
             t.text.lower()
             for t in tokens
-            if not t.is_punct and not t.is_space and not t.is_stop
+            if not t.is_punct and not t.is_space and not t.is_stop and not t.is_digit
         ]
 
     def read_file_tokens(self, src: str) -> Iterator[str]:
