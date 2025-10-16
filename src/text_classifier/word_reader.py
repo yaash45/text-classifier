@@ -14,8 +14,7 @@ class WordReader:
     ```
     reader = WordReader()
 
-    print("Please input some text:")
-    words_iterator = reader.read_user_input_tokens()
+    words_iterator = reader.read_user_input_tokens("Please enter some text: ")
 
     print(list(words_iterator))
 
@@ -66,15 +65,19 @@ class WordReader:
                 for word in self.parse_words(line):
                     yield word
 
-    def read_user_input_tokens(self) -> Iterator[str]:
+    def read_user_input_tokens(self, prompt: str) -> Iterator[str]:
         """
         Read the user's input string and yield word tokens
         contained within the input text.
 
+        Args:
+            prompt: the string to display as a prompt to get the user's
+                input
+
         Yields:
             One word at a time, as parsed from the user's input string
         """
-        input_text = input()
+        input_text = input(prompt)
 
         for word in self.parse_words(input_text):
             yield word

@@ -163,5 +163,5 @@ def test_read_user_input_tokens(text: str, expected: list[str]):
     reader = WordReader()
 
     with patch("builtins.input", return_value=text):
-        words = list(reader.read_user_input_tokens())
+        words = list(reader.read_user_input_tokens("please enter some text:"))
         assert words == filter_stop_words(expected)
