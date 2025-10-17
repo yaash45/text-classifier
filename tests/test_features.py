@@ -1,4 +1,6 @@
-from text_classifier.features import Vocabulary, WordBag
+from pytest import mark
+
+from text_classifier.features import Vocabulary, WordBag, vectorize
 
 
 def test_vocabulary_registration_no_repetition():
@@ -60,3 +62,49 @@ def test_word_bag():
         "scan": 1,
         "gabagool": 1,
     }
+
+
+@mark.parametrize(
+    "words,expected",
+    [
+        (
+            # some repeated elements
+            [
+                "test",
+                "this",
+                "new",
+                "function",
+                "test",
+                "this",
+                "very",
+                "well",
+                "well",
+                "test",
+            ],
+            [3, 2, 1, 1, 1, 2],
+        ),
+        (
+            # one word repeated multiple times
+            ["test", "test", "test", "test"],
+            [4],
+        ),
+        (
+            # one occurence of each word
+            ["a", "b", "c", "d", "e"],
+            [1, 1, 1, 1, 1],
+        ),
+        (
+            # empty words
+            [],
+            [],
+        ),
+    ],
+)
+def test_vectorize(words: list[str], expected: list[int]):
+    v = Vocabulary()
+    v.register(words)
+
+    bag = WordBag(words)
+
+    result = vectorize(bag, v)
+    assert list(result) == expected
