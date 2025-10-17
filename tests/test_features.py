@@ -1,4 +1,4 @@
-from text_classifier.features import Vocabulary
+from text_classifier.features import Vocabulary, WordBag
 
 
 def test_vocabulary_registration_no_repetition():
@@ -47,3 +47,16 @@ def test_vocabulary_registration_with_repetition():
     # non-existent vocabulary item
     assert v.index_of("gabagool") == -1
     assert v.word_at(10) is None
+
+
+def test_word_bag():
+    words = ["word", "word", "test", "word", "scan", "gabagool"]
+
+    bag = WordBag(words)
+
+    assert dict(bag) == {
+        "word": 3,
+        "test": 1,
+        "scan": 1,
+        "gabagool": 1,
+    }
