@@ -11,6 +11,9 @@ class Vocabulary(dict[str, int]):
 
     _count: int = 0
 
+    # store reverse mapping for fast word lookups
+    _reverse_mapping: dict[int, str] = {}
+
     def register(self, words: Iterable[str]):
         """
         Adds a collection of words to the current Vocabulary
@@ -33,6 +36,7 @@ class Vocabulary(dict[str, int]):
         for word in words:
             if word not in self:
                 self[word] = self._count
+                self._reverse_mapping[self._count] = word
                 self._count += 1
 
     def index_of(self, word: str) -> int:
@@ -60,6 +64,31 @@ class Vocabulary(dict[str, int]):
             ```
         """
         return self.get(word, -1)
+
+    def word_at(self, index: int) -> str | None:
+        """
+        Obtains the word corresponding to a given index in the vocabulary
+
+        Args:
+            index: the index of the word to be queried from this Vocabulary
+
+        Returns:
+            The word corresponding to the given index, or None if the index
+            doesn't exist in the vocabulary
+
+        Example:
+
+            ```
+            words = ["test", "word", "woman", "mystery"]
+
+            # prep the vocabulary
+            v = Vocabulary()
+            v.register(words)
+
+            assert v.word_at(0) == "test"
+            ```
+        """
+        return self._reverse_mapping.get(index, None)
 
 
 class WordBag(dict[str, int]):

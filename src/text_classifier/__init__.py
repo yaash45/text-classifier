@@ -1,4 +1,4 @@
-from .vocabulary import Vocabulary, WordBag, vectorize
+from .features import Vocabulary, WordBag, vectorize
 from .word_reader import WordReader
 
 
