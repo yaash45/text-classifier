@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 from pytest import mark
 
-from text_classifier.word_reader import WordReader
+from text_classifier.parser import parse_words, read_file_words, read_user_input_words
 
 from .utils import filter_stop_words
 
@@ -104,11 +104,9 @@ def test_parse_words(text: str, expected: list[str]):
     Test the core word parsing functionality of the WordReader class
     """
 
-    reader = WordReader()
-
     # filtering out the stop words in the test ensures that we conform to
     # the latest set provided by the library
-    assert reader.parse_words(text) == filter_stop_words(expected)
+    assert parse_words(text) == filter_stop_words(expected)
 
 
 @mark.parametrize(
@@ -120,15 +118,13 @@ def test_read_file_tokens(text: str, expected: list[str]):
     Test that words can be read from a file containing text
     """
 
-    reader = WordReader()
-
     with tempfile.NamedTemporaryFile() as temp:
         # Setup by writing some text into the temp file
         temp.write(bytes(text, "utf-8"))
         temp.flush()
 
         # Parse the written text from the file into tokens
-        words = list(reader.read_file_tokens(temp.name))
+        words = list(read_file_words(temp.name))
         assert words == filter_stop_words(expected)
 
 
@@ -141,8 +137,6 @@ def test_read_user_input_tokens(text: str, expected: list[str]):
     Test that word tokens can be parsed through user input
     """
 
-    reader = WordReader()
-
     with patch("builtins.input", return_value=text):
-        words = list(reader.read_user_input_tokens("please enter some text:"))
+        words = list(read_user_input_words("please enter some text:"))
         assert words == filter_stop_words(expected)
