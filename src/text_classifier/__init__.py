@@ -1,25 +1,24 @@
 from .features import Vocabulary, WordBag, vectorize
-from .word_reader import WordReader
+from .parser import parse_words
 
 
 def main() -> None:
     print("Hello from text-classifier!\n")
 
     docs: list[str] = [
-        "this is Tony Soprano, the mafia don of New Jersey. Gabagool is his favourite food. Bring him some Gabagool from Sariatles in New Jersey",
+        "this is Tony Soprano, the mafia don of New Jersey. Gabagool is his favourite food. Bring him some Gabagool from Satrialles in New Jersey",
         "Sylvio: ay Ton, Christopher came in earlier... said he was carrying a.. lighter bag",
         "Tony: !!!!! WHAT?? STOP BREAKING MY ....",
         "see you tomorrow boss",
         "boss, boss, boss, boss.... Christopher, Tony, and Sylvio are going to take care of the gabagool! $100",
     ]
 
-    reader = WordReader()
     vocab = Vocabulary()
     bags: list[WordBag] = []
 
     # register all the seen words with the vocabulary
     for doc in docs:
-        words = reader.parse_words(doc)
+        words = parse_words(doc)
         vocab.register(words)
         bag = WordBag(words)
         bags.append(bag)
