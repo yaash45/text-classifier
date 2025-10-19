@@ -20,4 +20,6 @@ nlp_model = spacy.load("en_core_web_sm")
 
 import_end = perf_counter()
 
-logger.debug(f"nlp model loading complete. time elapsed: {import_end - import_start}s")
+logger.debug(
+    f"[yellow bold italic]NLP model loading complete. Time elapsed: {import_end - import_start:.2f} seconds[/]"
+)
