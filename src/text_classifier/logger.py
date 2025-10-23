@@ -1,6 +1,9 @@
 import logging
 
+from rich.console import Console
 from rich.logging import RichHandler
+
+console = Console(color_system="256")
 
 
 def configure_logger(verbosity: int):
@@ -23,7 +26,7 @@ def configure_logger(verbosity: int):
         level=level,
         format="[%(name)s] %(message)s",
         datefmt="%H:%M:%S",
-        handlers=[RichHandler(rich_tracebacks=True, markup=True)],
+        handlers=[RichHandler(console=console, rich_tracebacks=True, markup=True)],
     )
 
 
@@ -37,4 +40,5 @@ def get_logger(name: str) -> logging.Logger:
     Returns:
         A logger with the given name.
     """
+    return logging.getLogger(name)
     return logging.getLogger(name)
