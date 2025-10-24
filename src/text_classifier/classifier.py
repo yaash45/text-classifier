@@ -5,6 +5,35 @@ from .parser import parse_words
 logger = get_logger(__name__)
 
 
+class WordLikelihood(dict[str, float]):
+    """
+    Stores smoothed word likelihoods for a vocabulary.
+
+    Uses Laplace/Lidstone smoothing: unseen words are assigned
+    k / (total_words + k * vocab_size).
+
+    Attributes:
+        total_words (int): The total number of words in the category.
+
+        vocab_size (int): The size of the vocabulary.
+
+        k (float): The smoothing parameter for Laplace smoothing. Defaults to 1.0.
+    """
+
+    def __init__(self, total_words: int, vocab_size: int, k: float = 1.0):
+        super().__init__()
+        self.total_words = total_words
+        self.vocab_size = vocab_size
+        self.k = k
+
+    def __getitem__(self, key: str) -> float:
+        if key in self:
+            return super().__getitem__(key)
+        else:
+            # lazily calculate unseen word probability on demand
+            return self.k / (self.total_words + (self.k * self.vocab_size))
+
+
 class Classifier:
     """
     A simple Naive Bayes classifier for text classification.
@@ -37,7 +66,7 @@ class Classifier:
         self._total_words_per_category: dict[str, int] = {}
 
         # store word likelihoods-per-category, aka P(word|category)
-        self._likelihoods: dict[str, dict[str, float]] = {}
+        self._likelihoods: dict[str, WordLikelihood] = {}
 
     @property
     def vocabulary(self) -> Vocabulary:
@@ -70,7 +99,7 @@ class Classifier:
         return self._priors
 
     @property
-    def word_likelihoods_per_category(self) -> dict[str, dict[str, float]]:
+    def word_likelihoods_per_category(self) -> dict[str, WordLikelihood]:
         """
         A dictionary mapping category labels to their respective word likelihoods.
 
@@ -108,9 +137,9 @@ class Classifier:
             category (str): the category to query for the total word count
 
         Returns:
-            int: the total number of words in the given category, or -1 if the category does not exist
+            int: the total number of words in the given category
         """
-        return self._total_words_per_category.get(category.lower(), -1)
+        return self._total_words_per_category.get(category.lower(), 0)
 
     def _build_category_word_counts(self, data: list[tuple[str, str]]):
         """
@@ -170,15 +199,20 @@ class Classifier:
 
         # Calculate word likelihoods
         self._total_words_per_category: dict[str, int] = {
-            category: len(word_count_map)
+            category: sum(word_count_map.values())
             for category, word_count_map in self._word_freq_per_category.items()
         }
 
-        for category, word_count_map in self._word_freq_per_category.items():
+        for category in self._word_freq_per_category.keys():
             category_total = self._total_words_per_category[category]
-            for word, freq in word_count_map.items():
+
+            for word in self._vocab.keys():
                 if category not in self._likelihoods:
-                    self._likelihoods[category] = {}
+                    self._likelihoods[category] = WordLikelihood(
+                        k=k, vocab_size=len(self._vocab), total_words=category_total
+                    )
+
+                freq = self._word_freq_per_category[category].get(word, 0)
 
                 self._likelihoods[category][word] = (
                     self._calculate_smoothed_word_likelihood(
