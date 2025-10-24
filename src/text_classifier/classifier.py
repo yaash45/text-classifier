@@ -203,16 +203,13 @@ class Classifier:
             for category, word_count_map in self._word_freq_per_category.items()
         }
 
-        for category in self._word_freq_per_category.keys():
+        for category, word_count_map in self._word_freq_per_category.items():
             category_total = self._total_words_per_category[category]
-
-            for word in self._vocab.keys():
+            for word, freq in word_count_map.items():
                 if category not in self._likelihoods:
                     self._likelihoods[category] = WordLikelihood(
                         k=k, vocab_size=len(self._vocab), total_words=category_total
                     )
-
-                freq = self._word_freq_per_category[category].get(word, 0)
 
                 self._likelihoods[category][word] = (
                     self._calculate_smoothed_word_likelihood(
