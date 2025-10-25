@@ -1,4 +1,7 @@
-from .features import Vocabulary
+from math import exp, log
+from typing import Mapping
+
+from .features import Vocabulary, WordBag
 from .logger import get_logger
 from .parser import parse_words
 
@@ -240,3 +243,36 @@ class Classifier:
         denominator = category_total + (k * len(self._vocab))
 
         return numerator / denominator
+
+    def predict(self, doc: str) -> Mapping[str, float]:
+        """
+        Predict category probabilities for the input document.
+
+        Args:
+            doc: input text string
+
+        Returns:
+            dict mapping category -> probability
+        """
+        words = parse_words(doc)
+        bag = WordBag(words)
+
+        log_result: Mapping[str, float] = {}
+
+        for category, prior in self._priors.items():
+            # initialize score
+            score = log(prior)
+
+            # aggregate the scores contributed by each word
+            for word, count in bag.items():
+                score += count * log(self._likelihoods[category][word])
+
+            log_result[category] = score
+
+        # convert the logarithmic values calculated into human-readable
+        # probability values
+        max_log = max(log_result.values())
+        exp_result = {c: exp(val - max_log) for c, val in log_result.items()}
+        total = sum(exp_result.values())
+
+        return {c: score / total for c, score in exp_result.items()}
