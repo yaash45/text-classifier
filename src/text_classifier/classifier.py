@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import pickle
 from math import exp, log
 from typing import Mapping
 
@@ -276,3 +279,18 @@ class Classifier:
         total = sum(exp_result.values())
 
         return {c: score / total for c, score in exp_result.items()}
+
+    def save(self):
+        with open("model.pkl", "wb") as f:
+            pickle.dump(self, f)
+
+    @classmethod
+    def load(cls) -> Classifier:
+        c: Classifier | None = None
+        with open("model.pkl", "rb") as f:
+            c = pickle.load(f)
+
+        if c is not None:
+            return c
+        else:
+            return Classifier()
