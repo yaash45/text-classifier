@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from text_classifier.classifier import Classifier
+from text_classifier import Classifier
 
 from .models import UserInputText
 
