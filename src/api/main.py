@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from datasets import load_dataset
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
@@ -11,21 +13,29 @@ app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-training_ds = load_dataset("ucirvine/sms_spam", split="train")
+classifier_path = Path("./model.pkl")
 
-label_map = {0: "legit", 1: "spam", -1: "unknown"}
+if not classifier_path.exists():
+    training_ds = load_dataset("ucirvine/sms_spam", split="train")
 
-docs = []
+    label_map = {0: "legit", 1: "spam", -1: "unknown"}
 
-for entry in training_ds:
-    if isinstance(entry, dict):
-        doc = entry.get("sms", "")
-        label = label_map[entry.get("label", -1)]
-        docs.append((doc, label))
+    docs = []
 
-c = Classifier()
+    for entry in training_ds:
+        if isinstance(entry, dict):
+            doc = entry.get("sms", "")
+            label = label_map[entry.get("label", -1)]
+            docs.append((doc, label))
 
-c.train(docs)
+    c = Classifier()
+
+    c.train(docs)
+
+    c.save()
+
+else:
+    c = Classifier.load()
 
 
 @app.get("/")
